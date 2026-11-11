@@ -61,7 +61,9 @@ def test_proxy_strat_joint_cells():
 def test_proxy_iw_inverse_frequency():
     y, P, _ = _toy_data()
     out = fit_method(MethodConfig("proxy_iw", n_bins=4, cap_factor=1e9), y, P)
-    bins, _ = bin_proxy_quantiles(P, 4)
+    from proxystudy.proxies.quality import bin_proxy_equal_width
+
+    bins, _ = bin_proxy_equal_width(P, 4)
     counts = {b: (bins == b).sum() for b in np.unique(bins)}
     raw = np.array([1.0 / counts[bins[i]] for i in range(len(y))])
     np.testing.assert_allclose(out.weights, raw / raw.sum())
