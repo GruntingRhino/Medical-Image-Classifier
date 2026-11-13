@@ -43,11 +43,23 @@ def cohens_kappa(a: np.ndarray, b: np.ndarray) -> float:
 
 
 def dichotomize_proxy(proxy: np.ndarray, cut: float | None = None) -> np.ndarray:
-    """Dichotomize a continuous/ordinal proxy at ``cut`` (default: median)."""
+    """Dichotomize a continuous/ordinal proxy at ``cut`` (default: median).
+
+    Already-binary proxies pass through unchanged. If the median cut produces
+    a single category (heavily skewed discrete proxy), fall back to the mean;
+    if that also collapses, return the identity encoding.
+    """
     proxy = np.asarray(proxy, dtype=float)
+    if len(np.unique(proxy)) <= 2:
+        return proxy.astype(int)
     if cut is None:
         cut = float(np.median(proxy))
-    return (proxy >= cut).astype(int)
+    d = (proxy >= cut).astype(int)
+    if len(np.unique(d)) == 1:
+        d = (proxy > float(np.mean(proxy))).astype(int)
+    if len(np.unique(d)) == 1:
+        d = proxy.astype(int)
+    return d
 
 
 def normalized_mutual_info(a: np.ndarray, b: np.ndarray) -> float:

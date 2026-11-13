@@ -1,0 +1,97 @@
+{
+  "ham10000": {
+    "n_images": 10015,
+    "n_lesions": 7470,
+    "exact_duplicate_groups": 2,
+    "duplicate_images_total": 4,
+    "duplicates_spanning_splits": {},
+    "lesion_label_inconsistent": 0,
+    "lesions_spanning_splits": 0,
+    "y_counts": {
+      "0": 8902,
+      "1": 1113
+    },
+    "melanoma_prevalence": 0.11113330004992511,
+    "dx_counts": {
+      "nv": 6705,
+      "mel": 1113,
+      "bkl": 1099,
+      "bcc": 514,
+      "akiec": 327,
+      "vasc": 142,
+      "df": 115
+    },
+    "demographic_columns": [
+      "age",
+      "sex",
+      "localization"
+    ],
+    "skin_tone_annotation": false,
+    "split_counts": {
+      "train": 7036,
+      "test": 1989,
+      "val": 990
+    },
+    "proxy_rows": 10015,
+    "proxy_null_cells": 0
+  },
+  "fitzpatrick17k": {
+    "eval_subset_rows": 3190,
+    "content_md5_equals_filename": 3190,
+    "content_md5_mismatches": 0,
+    "content_duplicate_groups": 0,
+    "content_duplicate_keys": [],
+    "key_label_conflicts": 0,
+    "y_counts": {
+      "malignant": 1683,
+      "benign": 1507
+    },
+    "malignant_prevalence": 0.5275862068965518,
+    "fst_counts": {
+      "0": 104,
+      "1": 696,
+      "2": 1062,
+      "3": 641,
+      "4": 432,
+      "5": 187,
+      "6": 68
+    },
+    "fst_binary_audit_corrected": {
+      "dark_5_6": 255,
+      "light_1_2": 1758,
+      "mid_3_4": 1073,
+      "unknown_fst0_original_scale_minus1": 104,
+      "note": "fst==0 in the re-host corresponds to original fitzpatrick_scale==-1 (unknown); earlier loaders misassigned it to the light group"
+    },
+    "qc_flags": {
+      "NaN": 3104,
+      "1 Diagnostic": 75,
+      "5 Potentially": 6,
+      "3 Wrongly labelled": 3,
+      "2 Characteristic": 2
+    },
+    "proxy_fst_association": {
+      "spearman_ita_fst": -0.3069987017616275,
+      "spearman_p": 1.3626472867584756e-70,
+      "pearson_ita_fst": -0.2537324261504153,
+      "pearson_p": 4.7457589750752587e-48,
+      "ita_mean_dark_fst56": -5.217979893346544,
+      "ita_mean_light_fst12": 33.2589490068077,
+      "ita_mean_mid_fst34": 19.44960068793604,
+      "mannwhitney_dark_vs_light_p": 3.4144986608049905e-36
+    },
+    "published_corrections": {
+      "original_release_rows": 16577,
+      "original_unique_md5": 16577,
+      "rehost_C_rows_total": 11394,
+      "rehost_C_rows_eval_subset": 3190,
+      "dropped_by_rehost": 5183,
+      "new_in_rehost": 0,
+      "mirror_files_total": 16574,
+      "mirror_missing_from_original": 3,
+      "mirror_missing_in_eval_subset": 0,
+      "rehost_c_md5_all_in_original": true
+    },
+    "cross_dataset_content_overlap_with_ham": 0
+  }
+}

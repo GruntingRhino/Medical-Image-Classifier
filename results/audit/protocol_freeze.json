@@ -1,0 +1,114 @@
+{
+  "device": "cuda",
+  "cells": {
+    "erm::s0": {
+      "val_bacc_5ep": 0.8225212310372361,
+      "threshold": 0.024362079799175262,
+      "val_bacc_10ep": 0.7611236118167961
+    },
+    "erm::s1": {
+      "val_bacc_5ep": 0.8008002467881252,
+      "threshold": 0.01686913426965475,
+      "val_bacc_10ep": 0.7940680119038979
+    },
+    "erm::s2": {
+      "val_bacc_5ep": 0.8187740436960151,
+      "threshold": 0.020316787995398045,
+      "val_bacc_10ep": 0.7225266748929375
+    },
+    "class_strat::s0": {
+      "val_bacc_5ep": 0.8036945634027728,
+      "threshold": 0.004805729491636157,
+      "val_bacc_10ep": 0.78451404514771
+    },
+    "class_strat::s1": {
+      "val_bacc_5ep": 0.7886150831095304,
+      "threshold": 0.007992884609848261,
+      "val_bacc_10ep": 0.781175146984104
+    },
+    "class_strat::s2": {
+      "val_bacc_5ep": 0.7802678377005154,
+      "threshold": 0.0038897346239537,
+      "val_bacc_10ep": 0.7852943311315961
+    },
+    "proxy_strat::s0": {
+      "val_bacc_5ep": 0.8003556652391668,
+      "threshold": 0.0256329495459795,
+      "val_bacc_10ep": 0.7799139870799159
+    },
+    "proxy_strat::s1": {
+      "val_bacc_5ep": 0.7882612324889309,
+      "threshold": 0.025962870568037033,
+      "val_bacc_10ep": 0.7757766567467519
+    },
+    "proxy_strat::s2": {
+      "val_bacc_5ep": 0.8074598969296654,
+      "threshold": 0.03090686071664095,
+      "val_bacc_10ep": 0.7083726500689556
+    },
+    "proxy_strat_joint::s0": {
+      "val_bacc_5ep": 0.802397111127241,
+      "threshold": 0.014319142792373896,
+      "val_bacc_10ep": 0.7518327647528489
+    },
+    "proxy_strat_joint::s1": {
+      "val_bacc_5ep": 0.8024152573129129,
+      "threshold": 0.006750799715518951,
+      "val_bacc_10ep": 0.8087392030195253
+    },
+    "proxy_strat_joint::s2": {
+      "val_bacc_5ep": 0.7873176308339986,
+      "threshold": 0.013455630745738745,
+      "val_bacc_10ep": 0.8161791391449518
+    },
+    "proxy_iw::s0": {
+      "val_bacc_5ep": 0.7894679538361037,
+      "threshold": 0.022719708271324635,
+      "val_bacc_10ep": 0.7208572258111345
+    },
+    "proxy_iw::s1": {
+      "val_bacc_5ep": 0.7944763010815127,
+      "threshold": 0.03183590993285179,
+      "val_bacc_10ep": 0.7932151411773245
+    },
+    "proxy_iw::s2": {
+      "val_bacc_5ep": 0.7731091674530014,
+      "threshold": 0.07587992772459984,
+      "val_bacc_10ep": 0.7237696886114539
+    },
+    "proxy_dro::s0": {
+      "val_bacc_5ep": 0.8095376351890833,
+      "threshold": 0.02590881008654833,
+      "val_bacc_10ep": 0.7685816941278943
+    },
+    "proxy_dro::s1": {
+      "val_bacc_5ep": 0.8220947956739493,
+      "threshold": 0.031123077496886253,
+      "val_bacc_10ep": 0.7886332292952022
+    },
+    "proxy_dro::s2": {
+      "val_bacc_5ep": 0.7748693474631632,
+      "threshold": 0.03165307082235813,
+      "val_bacc_10ep": 0.7292770559628365
+    },
+    "random_proxy_strat::s0": {
+      "val_bacc_5ep": 0.8224486462945488,
+      "threshold": 0.02989177592098713,
+      "val_bacc_10ep": 0.7785983886187124
+    },
+    "random_proxy_strat::s1": {
+      "val_bacc_5ep": 0.7878347971256442,
+      "threshold": 0.026047756895422935
+    },
+    "random_proxy_strat::s2": {
+      "val_bacc_5ep": 0.7894861000217754,
+      "threshold": 0.025030829943716526
+    }
+  },
+  "rule": "adopt 10ep iff mean paired val-BAcc gain > 0.005",
+  "n_paired_cells": 19,
+  "mean_val_bacc_5ep": 0.7983906925621378,
+  "mean_val_bacc_10ep": 0.7669709813839237,
+  "mean_delta_10minus5": -0.0324439473875223,
+  "decision": "5ep"
+}

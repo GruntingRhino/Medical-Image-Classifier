@@ -133,6 +133,7 @@ def main(argv=None):
     ap.add_argument("--n-seeds", type=int, default=100)
     ap.add_argument("--tag", type=str, default="main")
     ap.add_argument("--quick", action="store_true", help="tiny grid for smoke tests")
+    ap.add_argument("--arm", choices=["main", "confound"], default="main")
     ap.add_argument("--jobs", type=int, default=8)
     args = ap.parse_args(argv)
 
@@ -151,19 +152,34 @@ def main(argv=None):
         )
         seeds = list(range(5))
     else:
-        grid = list(
-            itertools.product(
-                [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
-                [0.5, 0.25, 0.1],
-                [500, 2000, 8000],
-                [2, 5, 10],
-                [0.0, 0.7],
-                [0.0, 1.0],
-                ["logistic"],
-                [0.1],
+        if args.arm == "confound":
+            grid = list(
+                itertools.product(
+                    [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                    [0.25],
+                    [2000, 8000],
+                    [5],
+                    [0.7],
+                    [1.0],
+                    ["logistic"],
+                    [0.1],
+                )
             )
-        )
-        seeds = list(range(args.n_seeds))
+            seeds = list(range(args.n_seeds))
+        else:
+            grid = list(
+                itertools.product(
+                    [0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+                    [0.5, 0.25, 0.1],
+                    [500, 2000, 8000],
+                    [2, 5, 10],
+                    [0.0],
+                    [0.0],
+                    ["logistic"],
+                    [0.1],
+                )
+            )
+            seeds = list(range(args.n_seeds))
 
     jobs = [
         dict(
@@ -181,9 +197,6 @@ def main(argv=None):
         for rel, pg, n, nb, cf, cfeat, mdl, pgap in grid
         for seed in seeds
     ]
-    # NOTE: confounded cells (cf>0) keep cfeat=0 in this grid; the harmful-
-    # confounding variant runs with cfeat>0 separately in analyze phase.
-    jobs = [j for j in jobs if not (j["confound"] > 0 and j["confound_feature"] > 0)]
 
     print(f"total jobs: {len(jobs)}")
     t0 = time.time()
@@ -200,7 +213,7 @@ def main(argv=None):
             rec_cfg["tag"] = args.tag
             rec_cfg["proxy_quality"] = proxy_q
             rec_cfg["seconds"] = res["seconds"]
-            save_record(f"sim_{args.tag}", rec_cfg, metrics, seed=seed)
+            save_record(f"sim_{args.arm}", rec_cfg, metrics, seed=seed)
             if done % 50 == 0:
                 print(f"{done}/{len(jobs)} cells done ({time.time()-t0:.0f}s)", flush=True)
     print(f"all done in {time.time()-t0:.0f}s")

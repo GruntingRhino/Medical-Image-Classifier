@@ -99,25 +99,50 @@ def fit_tabular(
 def select_threshold_bacc(y_val: np.ndarray, scores_val: np.ndarray) -> float:
     """Decision threshold maximizing validation balanced accuracy.
 
-    Thresholds are the midpoints between sorted unique validation scores (plus
-    the extremes). Identical protocol is applied to every sampling method, so
-    threshold selection never favors a method.
+    Vectorized: sort once and sweep cumulative class counts. Thresholds are
+    the midpoints between sorted unique validation scores. Identical protocol
+    is applied to every sampling method, so threshold selection never favors
+    a method.
     """
     y_val = np.asarray(y_val, dtype=int)
     s = np.asarray(scores_val, dtype=float)
-    uniq = np.unique(s)
-    if len(uniq) == 1:
+    order = np.argsort(s, kind="mergesort")
+    s_sorted = s[order]
+    y_sorted = y_val[order]
+    n = len(s)
+    if n == 0:
         return 0.5
-    cands = np.concatenate([[-np.inf], (uniq[:-1] + uniq[1:]) / 2.0, [np.inf]])
-    best_t, best_b = 0.5, -1.0
-    for t in cands:
-        pred = (s > t).astype(int)
-        from ..stats.metrics import balanced_accuracy
-
-        b = balanced_accuracy(y_val, pred)
-        if b == b and b > best_b:
-            best_b, best_t = b, float(t)
-    return best_t
+    # candidate thresholds: midpoints between consecutive unique scores
+    is_new = np.empty(n, dtype=bool)
+    is_new[0] = True
+    is_new[1:] = s_sorted[1:] != s_sorted[:-1]
+    # cumulative sums evaluated AFTER each unique-score block:
+    # pred=1 for scores > t  <=>  items after the block boundary
+    block_end = np.where(np.concatenate([is_new[1:], [True]]))[0]  # last idx of each block
+    cum_pos = np.cumsum(y_sorted)
+    tot_pos = cum_pos[-1]
+    tot_neg = n - tot_pos
+    # for a cut after block k (0-indexed), predicted positive = items beyond cut
+    # tp = positives beyond cut, fp = negatives beyond cut
+    pos_before = cum_pos[block_end]          # positives at or before cut
+    neg_before = (block_end + 1) - pos_before
+    tp = tot_pos - pos_before
+    fp = tot_neg - neg_before
+    fn = tot_pos - tp
+    tn = tot_neg - fp
+    with np.errstate(invalid="ignore", divide="ignore"):
+        sens = np.where(tot_pos > 0, tp / tot_pos, np.nan)
+        spec = np.where(tot_neg > 0, tn / tot_neg, np.nan)
+    bacc = (sens + spec) / 2
+    valid = ~np.isnan(bacc)
+    if not valid.any():
+        return 0.5
+    k = int(np.nanargmax(bacc))
+    cut_idx = block_end[k]
+    if cut_idx >= n - 1:
+        return float(s_sorted[-1] + 1.0)
+    t = (s_sorted[cut_idx] + s_sorted[cut_idx + 1]) / 2.0
+    return float(t)
 
 
 def sweep_C(

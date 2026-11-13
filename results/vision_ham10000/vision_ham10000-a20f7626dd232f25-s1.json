@@ -1,0 +1,66 @@
+{
+  "experiment": "vision_ham10000",
+  "config": {
+    "variant": "corrupt_eps0.0",
+    "eps": 0.0,
+    "method": "erm",
+    "n_bins": 5,
+    "epochs": 5,
+    "batch_size": 64,
+    "lr": 0.0001,
+    "tag": "main"
+  },
+  "config_hash": "a20f7626dd232f25",
+  "code_revision": "838d8fefa3b64aca7254966eaacf081414be3006",
+  "seed": 1,
+  "artifacts": {},
+  "metrics": {
+    "method": "erm",
+    "seed": 1,
+    "variant": "corrupt_eps0.0",
+    "eps": 0.0,
+    "n_bins": 5,
+    "threshold": 0.01686913426965475,
+    "epochs": 5,
+    "val_bacc": 0.8008002467881252,
+    "ham_test_checksum": "06030a5e82ec0114",
+    "ham_bacc": 0.8272971375713037,
+    "ham_auroc": 0.9040187059972249,
+    "proxy_quality_note": "no true group in HAM10000; proxy quality vs FST validated on Fitzpatrick17k",
+    "fitz_bacc": 0.5798344110924618,
+    "fitz_auroc": 0.6151711896276477,
+    "fitz_groups": {
+      "groups": [
+        0,
+        1
+      ],
+      "group_sizes": {
+        "0": 1758,
+        "1": 255
+      },
+      "group_bacc": {
+        "0": 0.5893016777197979,
+        "1": 0.5666153846153846
+      },
+      "group_sens": {
+        "0": 0.5620985010706638,
+        "1": 0.6692307692307692
+      },
+      "group_spec": {
+        "0": 0.616504854368932,
+        "1": 0.464
+      },
+      "group_auroc": {
+        "0": 0.627718238706056,
+        "1": 0.5994461538461539
+      },
+      "undefined_groups": {},
+      "worst_group_bacc": 0.5666153846153846,
+      "best_group_bacc": 0.5893016777197979,
+      "sbag": 0.02268629310441328
+    },
+    "fitz_bacc_fst34_unknown": 0.569743371491769,
+    "fitz_checksum": "377016a8e2c31858"
+  },
+  "timestamp": "2026-11-12T00:22:04Z"
+}

@@ -1,0 +1,56 @@
+{
+  "experiment": "tabular_german",
+  "config": {
+    "dataset": "german",
+    "variant": "confounded_eps0.6",
+    "eps": 0.6,
+    "mode": "confounded",
+    "method": "random_proxy_strat",
+    "n_bins": 5,
+    "tag": "main"
+  },
+  "config_hash": "69a2185f45b0ae3d",
+  "code_revision": "838d8fefa3b64aca7254966eaacf081414be3006",
+  "seed": 16,
+  "artifacts": {},
+  "metrics": {
+    "method": "random_proxy_strat",
+    "seed": 16,
+    "n_bins": 5,
+    "C": 3.0,
+    "threshold": 0.3178312562256514,
+    "metrics": {
+      "groups": [
+        0,
+        1
+      ],
+      "group_sizes": {
+        "0": 63,
+        "1": 137
+      },
+      "group_bacc": {
+        "0": 0.7195652173913043,
+        "1": 0.6939432989690721
+      },
+      "group_sens": {
+        "0": 0.7391304347826086,
+        "1": 0.625
+      },
+      "group_spec": {
+        "0": 0.7,
+        "1": 0.7628865979381443
+      },
+      "group_auroc": {
+        "0": 0.7630434782608696,
+        "1": 0.7626288659793814
+      },
+      "undefined_groups": {},
+      "worst_group_bacc": 0.6939432989690721,
+      "best_group_bacc": 0.7195652173913043,
+      "sbag": 0.02562191842223216
+    },
+    "auroc": 0.7657281890858533,
+    "seconds": 0.4817314147949219
+  },
+  "timestamp": "2026-11-11T19:47:12Z"
+}

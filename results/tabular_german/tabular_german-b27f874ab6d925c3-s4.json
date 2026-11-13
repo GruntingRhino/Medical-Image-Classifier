@@ -1,0 +1,56 @@
+{
+  "experiment": "tabular_german",
+  "config": {
+    "dataset": "german",
+    "variant": "confounded_eps0.6",
+    "eps": 0.6,
+    "mode": "confounded",
+    "method": "class_strat",
+    "n_bins": 5,
+    "tag": "main"
+  },
+  "config_hash": "b27f874ab6d925c3",
+  "code_revision": "838d8fefa3b64aca7254966eaacf081414be3006",
+  "seed": 4,
+  "artifacts": {},
+  "metrics": {
+    "method": "class_strat",
+    "seed": 4,
+    "n_bins": 5,
+    "C": 3.0,
+    "threshold": 0.44424021825357074,
+    "metrics": {
+      "groups": [
+        0,
+        1
+      ],
+      "group_sizes": {
+        "0": 63,
+        "1": 137
+      },
+      "group_bacc": {
+        "0": 0.7347826086956522,
+        "1": 0.6644329896907216
+      },
+      "group_sens": {
+        "0": 0.8695652173913043,
+        "1": 0.7
+      },
+      "group_spec": {
+        "0": 0.6,
+        "1": 0.6288659793814433
+      },
+      "group_auroc": {
+        "0": 0.7554347826086957,
+        "1": 0.7561855670103093
+      },
+      "undefined_groups": {},
+      "worst_group_bacc": 0.6644329896907216,
+      "best_group_bacc": 0.7347826086956522,
+      "sbag": 0.07034961900493053
+    },
+    "auroc": 0.7598192561696211,
+    "seconds": 0.8772015571594238
+  },
+  "timestamp": "2026-11-11T19:47:04Z"
+}

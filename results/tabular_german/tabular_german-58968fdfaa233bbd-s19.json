@@ -1,0 +1,56 @@
+{
+  "experiment": "tabular_german",
+  "config": {
+    "dataset": "german",
+    "variant": "corrupt_eps0.3",
+    "eps": 0.3,
+    "mode": "corrupt",
+    "method": "oracle_strat",
+    "n_bins": 5,
+    "tag": "main"
+  },
+  "config_hash": "58968fdfaa233bbd",
+  "code_revision": "838d8fefa3b64aca7254966eaacf081414be3006",
+  "seed": 19,
+  "artifacts": {},
+  "metrics": {
+    "method": "oracle_strat",
+    "seed": 19,
+    "n_bins": 5,
+    "C": 3.0,
+    "threshold": 0.3080711757270177,
+    "metrics": {
+      "groups": [
+        0,
+        1
+      ],
+      "group_sizes": {
+        "0": 63,
+        "1": 137
+      },
+      "group_bacc": {
+        "0": 0.7505434782608695,
+        "1": 0.657860824742268
+      },
+      "group_sens": {
+        "0": 0.8260869565217391,
+        "1": 0.625
+      },
+      "group_spec": {
+        "0": 0.675,
+        "1": 0.6907216494845361
+      },
+      "group_auroc": {
+        "0": 0.7554347826086957,
+        "1": 0.752319587628866
+      },
+      "undefined_groups": {},
+      "worst_group_bacc": 0.657860824742268,
+      "best_group_bacc": 0.7505434782608695,
+      "sbag": 0.0926826535186015
+    },
+    "auroc": 0.7548372146912293,
+    "seconds": 0.7201993465423584
+  },
+  "timestamp": "2026-11-11T19:46:51Z"
+}

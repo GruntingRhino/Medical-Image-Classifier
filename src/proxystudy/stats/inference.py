@@ -44,19 +44,33 @@ def _rank_stats(scores: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarr
     return pos, neg
 
 
-def _placement_vectors(score_a: np.ndarray, score_b: np.ndarray, y: np.ndarray):
-    """DeLong placement vectors (phi10, phi01) for two scores on same items."""
-    n1 = int((y == 1).sum())
-    n0 = int((y == 0).sum())
-    va = np.empty((n1, n0))
-    vb = np.empty((n1, n0))
+def _placement_components(score_a: np.ndarray, score_b: np.ndarray, y: np.ndarray):
+    """DeLong structural components (v = per-positive placement mean,
+    w = per-negative placement mean) for two scores on the same items.
+
+    Streams over positives in chunks: time O(n1*n0), memory O(n0*chunk),
+    so large test sets (e.g., Adult) do not materialize the n1*n0 matrix.
+    """
     pos_idx = np.where(y == 1)[0]
     neg_idx = np.where(y == 0)[0]
-    for i, pi in enumerate(pos_idx):
-        for j, nj in enumerate(neg_idx):
-            va[i, j] = (score_a[pi] > score_a[nj]) + 0.5 * (score_a[pi] == score_a[nj])
-            vb[i, j] = (score_b[pi] > score_b[nj]) + 0.5 * (score_b[pi] == score_b[nj])
-    return va, vb, n1, n0
+    n1, n0 = len(pos_idx), len(neg_idx)
+    chunk = max(1, int(2e7 // max(n0, 1)))
+    v = np.empty((2, n1))
+    w = np.empty((2, n0))
+    for k, s in enumerate((score_a, score_b)):
+        s_pos, s_neg = s[pos_idx], s[neg_idx]
+        v_k = np.empty(n1)
+        w_acc = np.zeros(n0)
+        for i0 in range(0, n1, chunk):
+            block = s_pos[i0 : i0 + chunk][:, None]
+            ind = (block > s_neg[None, :]).astype(np.float32)
+            ind += 0.5 * (block == s_neg[None, :])
+            # exact accumulation in float64 (float32 sums drift ~1e-10)
+            v_k[i0 : i0 + chunk] = ind.sum(axis=1, dtype=np.float64) / n0
+            w_acc += ind.sum(axis=0, dtype=np.float64)
+        v[k] = v_k
+        w[k] = w_acc / n1
+    return v[0], w[0], v[1], w[1], n1, n0
 
 
 def _delong_paired_z(score_a: np.ndarray, score_b: np.ndarray, y: np.ndarray) -> tuple[float, float, float]:
@@ -68,26 +82,19 @@ def _delong_paired_z(score_a: np.ndarray, score_b: np.ndarray, y: np.ndarray) ->
     n0 = int((y == 0).sum())
     if n1 == 0 or n0 == 0:
         return np.nan, np.nan, np.nan
-    if n1 * n0 <= 10_000_000:
-        va, vb, n1, n0 = _placement_vectors(score_a, score_b, y)
-        # structural components
-        v_a = va.mean(axis=1)  # per-positive
-        w_a = va.mean(axis=0)
-        v_b = vb.mean(axis=1)
-        w_b = vb.mean(axis=0)
-        cov_v = np.cov(np.vstack([v_a, v_b]), ddof=1)
-        cov_w = np.cov(np.vstack([w_a, w_b]), ddof=1)
-        s = cov_v / n1 + cov_w / n0
-        auc_a = float(np.mean(va))
-        auc_b = float(np.mean(vb))
-        d = auc_a - auc_b
-        var = float(s[0, 0] + s[1, 1] - 2 * s[0, 1])
-        if var <= 0:
-            return d, np.nan, np.nan if d != 0 else 1.0
-        z = d / np.sqrt(var)
-        p = 2 * st.norm.sf(abs(z))
-        return d, z, float(p)
-    raise MemoryError("too many items for DeLong placement computation")
+    v_a, w_a, v_b, w_b, n1, n0 = _placement_components(score_a, score_b, y)
+    cov_v = np.cov(np.vstack([v_a, v_b]), ddof=1)
+    cov_w = np.cov(np.vstack([w_a, w_b]), ddof=1)
+    s = cov_v / n1 + cov_w / n0
+    auc_a = float(np.mean(v_a))
+    auc_b = float(np.mean(v_b))
+    d = auc_a - auc_b
+    var = float(s[0, 0] + s[1, 1] - 2 * s[0, 1])
+    if var <= 0:
+        return d, np.nan, np.nan if d != 0 else 1.0
+    z = d / np.sqrt(var)
+    p = 2 * st.norm.sf(abs(z))
+    return d, z, float(p)
 
 
 def delong_paired_test(
