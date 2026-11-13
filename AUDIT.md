@@ -52,3 +52,37 @@ Additional observations:
   config hash, and data checksum.
 - Historical claims are restated as hypotheses H1–H3 in `CHECKLIST.md` and are only
   referenced in the manuscript as "unverified prior claims", never as evidence.
+
+## Addendum 2026-11-13 — original artifacts located (corrects "no artifacts" above)
+
+Auditor: Claude (Opus 5.5), remote session. The Phase 0 search missed the original
+project, which exists at
+`~/Hermes/hermes-os/research_ai_projects/project_1_medical_bias_audit/` (not a git
+repository; files dated 2026-06-14 to 2026-07-19). It contains `paper/main.tex`, the
+validation scripts and the result JSONs behind the published PDF (dated 2026-11-07).
+The classifications of C1-C3 stay **unsupported**, now with positive evidence instead of
+absence of evidence:
+
+1. **C1/C2: the P-Stratified medical row is not from the controlled comparison.**
+   `results/medical_baseline_comparison.json` computes ERM, Class-Str and Proxy-RW in
+   `src/run_medical_baselines.py`. The "P-Str (ours)" row (BA 0.8967, lighter 0.9028,
+   darker 0.871) is copied verbatim from `clinical_grade_metrics.json`, which came from a
+   different pipeline run (`src/project1_clinical_pipeline.py`) with a different
+   stratification ("label + brightness group"). Paper Limitation 6 alludes to this.
+2. **C1/C2: unequal operating points.** In `results/hypothesis_tests.json` the medical
+   test compares ERM at threshold 0.35 with P-Stratified at threshold 0.82. The
+   "optimal threshold" evaluation in `medical_evaluation.json` does not show that 0.82
+   was selected on validation data only.
+3. **C2: the "darker" subgroup is the proxy itself.** Subgroups are image-brightness
+   bins. The PAD-UFES test split has only 4 images of Fitzpatrick types 5-6 (3 + 1), so no
+   claim about dark skin is estimable from it.
+4. **C3:** `results/tabular_sex_results.json` comes from a single training run. Its p-value
+   is a test-set bootstrap with no seed variation, and the sex/hours analysis was added
+   after the race analysis was non-significant. The rebuild's multi-seed Adult/German
+   results (CHECKLIST.md) find no reduction.
+5. **Reproducibility:** `run_all.sh` calls `src/validations/tabular_validation.py` and
+   `text_validation.py`, which do not exist. The GitHub repository named in the paper
+   contains only a LICENSE file.
+6. **Algorithm 1 is a no-op for continuous proxies.** Quantile bins hold equal counts, so
+   oversampling to the largest bin repeats each bin once. This was confirmed independently
+   by the rebuild (paper/report.md, finding (a)).
