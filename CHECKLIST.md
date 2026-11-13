@@ -73,7 +73,7 @@ No historical number is ever reported as a result.
 | Calibration simulation, strong null + power | DONE | `results/sim_seed/sim_seed.json`, table 9, `fig_sim_calibration.png` |
 | Calibration simulation, heterogeneous null | DONE | `results/sim_seed/sim_seed_het.json` |
 | Construct-matched external evaluation (EXPLORATORY) | DONE | `results/hier_summary/fitz-melanoma-exploratory.json` |
-| Reproduction of stored vision aggregate | see LEDGER | `../_verify/` comparison |
+| Reproduction of stored vision aggregate | DONE | JSON-identical rerun (LEDGER 2026-11-13) |
 | Manuscript (typeset) | DONE | `paper/paper.typ`, `paper/paper.pdf` |
 
 Supersedes: Fisher-combined p-values in `results/vision_summary/` and
