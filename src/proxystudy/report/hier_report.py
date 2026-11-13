@@ -176,7 +176,130 @@ def main():
         sim = _j(sim_path)
         (TABLES / "table9_sim_calibration.md").write_text(table_sim(sim))
         fig_sim(sim)
-    print("wrote tables 7-9 and figures")
+    paper_numbers()
+    print("wrote tables 7-9, figures and paper/numbers.json")
+
+
+
+def absolute_table(variant="corrupt_eps0.0"):
+    """Per-method absolute metrics (mean and SD over seeds) from stored predictions."""
+    from ..exp.aggregate_vision import load_context
+    from ..stats.metrics import auroc, balanced_accuracy
+
+    y_ham, _, y_fitz, g_fitz, _ = load_context()
+    preds = _j("results/preds/vision_ham10000-main.json")
+    acc: dict = {}
+    for key, p in preds.items():
+        v, method, _seed = key.rsplit("::", 2)
+        if v != variant:
+            continue
+        sh, sf, thr = np.asarray(p["ham_test_score"]), np.asarray(p["fitz_score"]), p["threshold"]
+        pf = (sf > thr).astype(int)
+        row = {"ham_bacc": balanced_accuracy(y_ham, (sh > thr).astype(int)), "ham_auroc": auroc(y_ham, sh),
+               "fitz_bacc": balanced_accuracy(y_fitz, pf), "fitz_auroc": auroc(y_fitz, sf)}
+        for name, m in (("dark", g_fitz == 1), ("light", g_fitz == 0)):
+            row[f"fitz_bacc_{name}"] = balanced_accuracy(y_fitz[m], pf[m])
+        acc.setdefault(method, []).append(row)
+    return {m: {k: {"mean": float(np.mean([r[k] for r in rows])), "sd": float(np.std([r[k] for r in rows], ddof=1)),
+                    "n": len(rows)} for k in rows[0]} for m, rows in sorted(acc.items())}
+
+
+def paper_numbers():
+    """Derived numbers quoted in the manuscript prose, written to paper/numbers.json."""
+    from scipy import stats as st
+
+    h = _j("results/hier_summary/hier-main.json")
+    mel = _j("results/hier_summary/fitz-melanoma-exploratory.json")
+    nums = {"mde_80": {}}
+    for split, metric in (("ham", "overall"), ("fitz", "overall"), ("fitz", "dark")):
+        halves = []
+        for by_m in h["vision"][split].values():
+            for r in by_m.values():
+                x = r[metric]
+                df = r["_design"]["n_seeds"] - 1
+                if x["primary"] == "t":
+                    se = (x["ci_primary"][1] - x["ci_primary"][0]) / 2 / st.t.ppf(0.975, df)
+                    halves.append((st.t.ppf(0.975, df) + st.t.ppf(0.8, df)) * se)
+        nums["mde_80"][f"{split}_{metric}"] = {"median": float(np.median(halves)),
+                                                "min": float(np.min(halves)), "max": float(np.max(halves))}
+    rows = h["primary_global_holm"]
+    nums["global"] = {"n_tests": len(rows), "n_sig": sum(r["p_holm_global"] < 0.05 for r in rows)}
+    nums["melanoma_subset"] = {k: mel[k] for k in ("n", "n_melanoma", "prevalence", "counts")}
+    nums["melanoma_subset"]["erm_eps0"] = {k: v["mean"] for k, v in mel["absolute"]["corrupt_eps0.0::erm"].items()}
+    old = _j("results/vision_summary/vision-main.json")["paired_vs_erm"]
+    neg = {}
+    for v, tab in old.items():
+        for arm in ("random_proxy_strat", "proxy_strat"):
+            neg[f"{v}::{arm}"] = {"old_holm_fitz": tab["holm"]["fitz_bacc"][arm],
+                                  "new_holm_fitz": h["vision"]["fitz"][v][arm]["overall"]["p_holm_family"]}
+    nums["negative_controls"] = neg
+    for name in ("sim_seed", "sim_seed_het"):
+        p = Path(f"results/sim_seed/{name}.json")
+        if p.exists():
+            cells = _j(p)["cells"]
+            nums[name] = {"max_null_rate": {k: float(max(c["rejection_rate"][k] for c in cells
+                                                         if c["effect"] == 0.0 or name == "sim_seed_het"))
+                                            for k, _ in PROCS}}
+    nums["absolute_eps0"] = absolute_table()
+    (Path("paper") / "numbers.json").write_text(json.dumps(nums, indent=1))
+    typst_tables(nums)
+    return nums
+
+
+def _f(x, d=3):
+    return f"{x:.{d}f}"
+
+
+def _d(r):
+    lo, hi = r["ci_primary"]
+    return f"{r['delta']:+.3f}\n[{lo:+.3f}, {hi:+.3f}]"
+
+
+def typst_tables(nums):
+    """Pre-formatted table rows for paper/paper.typ (generated, never typed)."""
+    h = _j("results/hier_summary/hier-main.json")
+    old = _j("results/vision_summary/vision-main.json")["paired_vs_erm"]
+    mel = _j("results/hier_summary/fitz-melanoma-exploratory.json")
+    t = {}
+    order = ["erm"] + [m for m in METHOD_ORDER if m in nums["absolute_eps0"]]
+    t["absolute"] = [[m] + [f"{_f(r[k]['mean'])} ({_f(r[k]['sd'])})" for k in
+                            ("ham_bacc", "ham_auroc", "fitz_bacc", "fitz_auroc", "fitz_bacc_dark", "fitz_bacc_light")]
+                     for m in order for r in [nums["absolute_eps0"][m]]]
+    v = "corrupt_eps0.0"
+    t["paired"] = []
+    for m in [x for x in METHOD_ORDER if x in h["vision"]["fitz"][v]]:
+        ham, fz = h["vision"]["ham"][v][m]["overall"], h["vision"]["fitz"][v][m]
+        t["paired"].append([m, _d(ham), _p(ham["p_holm_family"]), _d(fz["overall"]),
+                            _p(fz["overall"]["p_holm_family"]), _p(old[v]["holm"]["fitz_bacc"][m]),
+                            _d(fz["dark"]), _p(fz["dark"]["p_holm_family"])])
+    t["paired_eps"] = []
+    for v2 in ("corrupt_eps0.3", "corrupt_eps0.6"):
+        for m in [x for x in METHOD_ORDER if x in h["vision"]["fitz"][v2]]:
+            fz = h["vision"]["fitz"][v2][m]
+            t["paired_eps"].append([v2.replace("corrupt_", ""), m, _d(fz["overall"]),
+                                    _p(fz["overall"]["p_holm_family"]), _d(fz["dark"]), _p(fz["dark"]["p_holm_family"])])
+    t["tabular_sig"] = [[r["dataset"], r["variant"], r["method"], f"{r['delta']:+.3f} [{r['ci'][0]:+.3f}, {r['ci'][1]:+.3f}]",
+                         _p(r["p"]), _p(r["p_holm_global"])]
+                        for r in h["primary_global_holm"] if r["p_holm_global"] < 0.05]
+    t["melanoma"] = [[k.split("::")[1], _d(r["overall"]), _p(r["overall"]["p_primary"]), _d(r["dark"]),
+                      _p(r["dark"]["p_primary"])] for k, r in mel["paired_vs_erm"].items() if k.startswith("corrupt_eps0.0")]
+    for name in ("sim_seed", "sim_seed_het"):
+        path = Path(f"results/sim_seed/{name}.json")
+        if not path.exists():
+            continue
+        cells = _j(path)["cells"]
+        if name == "sim_seed":
+            t["sim_null"] = [[str(c["n_seeds"]), f"{c['tau']:.1f}"] + [_f(c["rejection_rate"][k]) for k, _ in PROCS]
+                             for c in sorted(cells, key=lambda c: (c["n_seeds"], c["tau"])) if c["effect"] == 0.0]
+            t["sim_power"] = [[str(c["n_seeds"]), f"{c['tau']:.1f}", f"{c['effect']:.2f}"] +
+                              [_f(c["rejection_rate"][k]) for k, _ in PROCS]
+                              for c in sorted(cells, key=lambda c: (c["n_seeds"], c["tau"], c["effect"]))
+                              if c["effect"] > 0 and c["n_seeds"] == 10]
+        else:
+            t["sim_het"] = [[str(c["n_seeds"]), f"{c['tau']:.1f}", f"{c['effect']:.1f}"] +
+                            [_f(c["rejection_rate"][k]) for k, _ in PROCS]
+                            for c in sorted(cells, key=lambda c: (c["n_seeds"], c["tau"], c["effect"]))]
+    (Path("paper") / "typ_tables.json").write_text(json.dumps(t, indent=1))
 
 
 if __name__ == "__main__":

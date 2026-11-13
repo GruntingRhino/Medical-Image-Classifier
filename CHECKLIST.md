@@ -62,3 +62,33 @@ No historical number is ever reported as a result.
 - Every number in the manuscript must trace to a `results/**.json` record
   produced by this repo (seed, config hash, checksums recorded in the ledger).
 - Append notable experiment summaries to `LEDGER.md`.
+
+## Phase 7 — Re-analysis and manuscript (2026-11-13)
+
+| Item | Status | Evidence |
+|---|---|---|
+| Snapshot of uncommitted Phase 2-6 work | DONE | commit `9c6b0cf`, `results/manifests/` |
+| Audit addendum (original artifacts found) | DONE | `AUDIT.md` |
+| Hierarchical (unit × seed) inference replacing Fisher | DONE | `stats/hierarchical.py`, `tests/test_hierarchical.py`, `results/hier_summary/hier-main.json` |
+| Calibration simulation, strong null + power | DONE | `results/sim_seed/sim_seed.json`, table 9, `fig_sim_calibration.png` |
+| Calibration simulation, heterogeneous null | DONE | `results/sim_seed/sim_seed_het.json` |
+| Construct-matched external evaluation (EXPLORATORY) | DONE | `results/hier_summary/fitz-melanoma-exploratory.json` |
+| Reproduction of stored vision aggregate | see LEDGER | `../_verify/` comparison |
+| Manuscript (typeset) | DONE | `paper/paper.typ`, `paper/paper.pdf` |
+
+Supersedes: Fisher-combined p-values in `results/vision_summary/` and
+`results/tabular_summary/` (kept for history, not used in the manuscript);
+`paper/report.md` (kept as the prior draft).
+
+Reproduce Phase 7 (from repo root, after `scripts/download_data.sh` and the
+primary runs):
+
+```bash
+.venv/bin/python -m pytest
+.venv/bin/python -m proxystudy.exp.hier_infer --n-boot 9999
+.venv/bin/python -m proxystudy.exp.fitz_melanoma
+.venv/bin/python scripts/sim_seed_inference.py --reps 1000 --n-boot 499
+.venv/bin/python scripts/sim_seed_inference.py --scenario heterogeneous_null --reps 1000 --n-boot 499 --out results/sim_seed/sim_seed_het.json
+.venv/bin/python -m proxystudy.report.hier_report
+uv run --no-project --with typst==0.13.2 python -c "import typst; typst.compile('paper/paper.typ', output='paper/paper.pdf', root='.')"
+```
