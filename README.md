@@ -62,11 +62,11 @@ HAM10000 (Tschandl et al. 2018, CC BY-NC-SA 4.0), Fitzpatrick17k (Groh et al. 20
 3.0; quality-controlled re-host by Abhishek et al. 2024), and UCI Adult and German credit. Skin type
 is used only for evaluation, never for training.
 
-## Use of AI tools
-
-Code, analysis and drafting were done with substantial help from AI coding agents (Anthropic's
-Claude and an OpenCode-based agent). The author directed the work, checked the results and is
-responsible for the content. Research only; not a medical device.
+> **Authorship & AI-use.** I designed and built this project. Anthropic's Claude (with an
+> OpenCode-based agent) was used as a coding and drafting assistant under my direction — to
+> scaffold code, run analyses, and draft prose. All research, design, and methodological
+> decisions are mine, and I reviewed and stand behind the code and results. All figures are
+> derived from public data by this code. Research only; not a medical device.
 
 ## License
 
